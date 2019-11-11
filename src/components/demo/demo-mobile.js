@@ -47,7 +47,7 @@ const DemoMobile = () => {
     <div key={requirementKey} className="d-flex justify-content-center py-5">
       <ChatBot
         steps={steps}
-        headerTitle="CoCo Demo"
+        headerTitle="CoCo Bot"
         finishSuccess={success}
         finishFailed={failed}
         resetSession={reset}
@@ -55,7 +55,7 @@ const DemoMobile = () => {
         setShowParams={setShowParams}
         height="490px"
         width="320px"
-        componentId="CoCo demo"
+        componentId="CoCo Bot"
       />
     </div>
   );

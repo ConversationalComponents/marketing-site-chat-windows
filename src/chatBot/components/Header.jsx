@@ -45,7 +45,8 @@ const Header = ({ headerTitle, showParams, setShowParams }) => {
       <h2 className={classes.title}>{headerTitle}</h2>
       <FormGroup>
         {headerTitle !== "CoCo's Chatbot Competition" &&
-          headerTitle !== "CoCo Demo" && (
+          headerTitle !== "CoCo Demo" &&
+          headerTitle !== "CoCo Bot" && (
             <FormControlLabel
               control={
                 <PurpleSwitch

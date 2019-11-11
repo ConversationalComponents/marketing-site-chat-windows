@@ -44,10 +44,14 @@ const Demo = () => {
   };
 
   return (
-    <div key={requirementKey} className="d-flex justify-content-center py-5">
+    <div
+      key={requirementKey}
+      className="d-flex justify-content-center py-5"
+      style={{ backgroundColor: "rgba(1, 166, 224, 1)" }}
+    >
       <ChatBot
         steps={steps}
-        headerTitle="CoCo Demo"
+        headerTitle="CoCo Bot"
         finishSuccess={success}
         finishFailed={failed}
         resetSession={reset}
@@ -55,7 +59,7 @@ const Demo = () => {
         setShowParams={setShowParams}
         height="490px"
         width="350px"
-        componentId="CoCo demo"
+        componentId="CoCo Bot"
       />
     </div>
   );

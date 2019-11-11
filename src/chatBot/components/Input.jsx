@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import withWidth from "@material-ui/core/withWidth";
 import firebase from "../../config/fbConfig";
@@ -42,6 +42,19 @@ const Input = ({
     };
   });
 
+  const [startTime, setStartTime] = useState(null);
+  const [totalTime, setTotaltime] = useState(null);
+  let timeOutId;
+  const [time, setTime] = useState(null);
+
+  // useEffect(() => {
+  //   if (totalTime) {
+  //     return () => {
+  //       console.log("unmount", componentId, totalTime);
+  //     };
+  //   }
+  // });
+
   useEffect(() => {
     if (renderedSteps.length > 2) {
       inputRef.current.focus();
@@ -59,7 +72,10 @@ const Input = ({
   };
 
   const onClick = () => {
-    console.log("click", componentId);
+    if (!startTime) {
+      console.log("new start", componentId);
+      setStartTime(performance.now());
+    }
     ReactGA.event({
       category: "Chat Window",
       action: "Input Click",
@@ -73,6 +89,42 @@ const Input = ({
     scrollView();
   };
 
+  useEffect(() => {
+    if (totalTime) {
+      console.log("total", totalTime);
+
+      setTime(
+        window.setTimeout(() => {
+          const value = parseInt(totalTime) + 30;
+          console.log("done!", value);
+          ReactGA.event({
+            category: "Chat Window",
+            action: "Conversation Time",
+            label: `${componentId}: ${value} sec`,
+            value
+          });
+          analytics.logEvent("input_click", {
+            category: "Chat Window",
+            action: "Conversation Time",
+            label: `${componentId}: ${value} sec`,
+            value
+          });
+        }, 30000)
+      );
+    }
+  }, [totalTime]);
+
+  const keyPress = (e, disabled) => {
+    if (e.key === "Enter") {
+      if (startTime) {
+        clearTimeout(time);
+        const total = ((performance.now() - startTime) / 1000).toFixed(2);
+        setTotaltime(total);
+      }
+    }
+    onKeyPress(e, disabled);
+  };
+
   const classes = useStyles();
   return (
     <input
@@ -82,7 +134,7 @@ const Input = ({
       ref={inputRef}
       value={value}
       onChange={onChange}
-      onKeyPress={e => onKeyPress(e, disabled)}
+      onKeyPress={e => keyPress(e, disabled)}
       type="textarea"
       // disabled={disabled}
       placeholder={inputInvalid ? "" : inputPlaceholder}
