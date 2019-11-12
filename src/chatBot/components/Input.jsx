@@ -3,9 +3,14 @@ import { makeStyles } from "@material-ui/core/styles";
 import withWidth from "@material-ui/core/withWidth";
 import firebase from "../../config/fbConfig";
 import ReactGA from "react-ga";
+import ReactPixel from "react-facebook-pixel";
+import LinkedInTag from "react-linkedin-insight";
+
+ReactPixel.init("411788576412453");
+LinkedInTag.init(1592785);
 
 const analytics = firebase.analytics();
-ReactGA.initialize("UA-143011310-3");
+ReactGA.initialize("UA-143011310-1");
 
 const Input = ({
   inputInvalid,
@@ -43,17 +48,10 @@ const Input = ({
   });
 
   const [startTime, setStartTime] = useState(null);
+  const [startFocus, setStartfocus] = useState(null);
   const [totalTime, setTotaltime] = useState(null);
-  let timeOutId;
   const [time, setTime] = useState(null);
-
-  // useEffect(() => {
-  //   if (totalTime) {
-  //     return () => {
-  //       console.log("unmount", componentId, totalTime);
-  //     };
-  //   }
-  // });
+  const [first, setFirst] = useState(false);
 
   useEffect(() => {
     if (renderedSteps.length > 2) {
@@ -76,6 +74,10 @@ const Input = ({
       console.log("new start", componentId);
       setStartTime(performance.now());
     }
+    ReactPixel.trackCustom("Input Click", {
+      action: "Input Click",
+      label: componentId
+    });
     ReactGA.event({
       category: "Chat Window",
       action: "Input Click",
@@ -97,6 +99,10 @@ const Input = ({
         window.setTimeout(() => {
           const value = parseInt(totalTime) + 30;
           console.log("done!", value);
+          ReactPixel.trackCustom("Conversation Time", {
+            label: componentId,
+            value
+          });
           ReactGA.event({
             category: "Chat Window",
             action: "Conversation Time",
@@ -116,6 +122,38 @@ const Input = ({
 
   const keyPress = (e, disabled) => {
     if (e.key === "Enter") {
+      if (!first) {
+        console.log("first");
+        setFirst(true);
+        LinkedInTag.track(1575841);
+        ReactPixel.trackCustom("Start Conversation", {
+          label: componentId
+        });
+        ReactGA.event({
+          category: "Chat Window",
+          action: "Start Conversation",
+          label: componentId
+        });
+        analytics.logEvent("input_click", {
+          category: "Chat Window",
+          action: "Start Conversation",
+          label: componentId
+        });
+      }
+
+      ReactPixel.trackCustom("Message Sent", {
+        label: componentId
+      });
+      ReactGA.event({
+        category: "Chat Window",
+        action: "Message Sent",
+        label: componentId
+      });
+      analytics.logEvent("input_click", {
+        category: "Chat Window",
+        action: "Message Sent",
+        label: componentId
+      });
       if (startTime) {
         clearTimeout(time);
         const total = ((performance.now() - startTime) / 1000).toFixed(2);
@@ -125,11 +163,43 @@ const Input = ({
     onKeyPress(e, disabled);
   };
 
+  const onFocus = () => {
+    console.log("focus", componentId);
+    setStartfocus(performance.now());
+    scrollView();
+  };
+
+  const onBlur = () => {
+    console.log("blur", componentId);
+    const totalFocusTime = ((performance.now() - startFocus) / 1000).toFixed(2);
+    console.log("total focus", totalFocusTime);
+    if (totalFocusTime > 10) {
+      LinkedInTag.track(1575849);
+      ReactPixel.trackCustom("Conversation10Sec", {
+        label: componentId,
+        value: totalFocusTime
+      });
+      ReactGA.event({
+        category: "Chat Window",
+        action: "Conversation10Sec",
+        label: `${componentId}: ${totalFocusTime} sec`,
+        value: totalFocusTime
+      });
+      analytics.logEvent("Conversation10Sec", {
+        category: "Chat Window",
+        action: "Conversation10Sec",
+        label: `${componentId}: ${totalFocusTime} sec`,
+        value: totalFocusTime
+      });
+    }
+  };
+
   const classes = useStyles();
   return (
     <input
       onClick={onClick}
-      onFocus={scrollView}
+      onFocus={onFocus}
+      onBlur={onBlur}
       className={classes.input}
       ref={inputRef}
       value={value}
