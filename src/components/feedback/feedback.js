@@ -5,7 +5,7 @@ const Feedback = () => {
   return (
     <div
       className="d-flex justify-content-center align-items-center"
-      style={{ minHeight: "100vh", backgroundColor: "rgba(1, 166, 224, 0.54)" }}
+      style={{ minHeight: "100vh" }}
     >
       <ChatWrapper
         name="CoCo Feedback"

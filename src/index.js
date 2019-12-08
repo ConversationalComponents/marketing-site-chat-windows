@@ -20,6 +20,14 @@ import DemoMobile from "./components/demo/demo-mobile";
 import Competition from "./components/competition/competition";
 import CompetitionMobile from "./components/competition/competition-mobile";
 
+// import TagManager from "react-gtm-module";
+
+// const tagManagerArgs = {
+//   gtmId: "GTM-MMJPSHT"
+// };
+
+// TagManager.initialize(tagManagerArgs);
+
 const theme = createMuiTheme({
   breakpoints: {
     values: {

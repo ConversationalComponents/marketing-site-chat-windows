@@ -6,7 +6,8 @@ const BotDemoResponse = ({
   previousStep,
   sessionId,
   triggerNextStep,
-  setFailed
+  setFailed,
+  onResponse
 }) => {
   const [res, setRes] = useState(null);
 
@@ -20,7 +21,10 @@ const BotDemoResponse = ({
 
   useEffect(() => {
     if (previousStep) {
-      const text = previousStep.message;
+      const voiceMessage = previousStep.value.voiceMessage;
+      const text = voiceMessage ? voiceMessage : previousStep.message;
+      // const text = previousStep.message;
+
       axios
         .post(
           `https://gwapi.imperson.com/appget.aspx?key=GDZTDKK9EGTPP7ZMDQYR`,
@@ -34,10 +38,11 @@ const BotDemoResponse = ({
             setRes("");
           } else {
             setRes(response.data.text);
+            onResponse(response.data.text);
           }
         })
         .catch(function(error) {
-          setRes("Failure!");
+          setRes("");
           setFailed(true);
           console.log("error", error);
         });

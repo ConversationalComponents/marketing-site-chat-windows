@@ -12,7 +12,8 @@ import FinishFailed from "./components/FinishFailed";
 import SubmitButton from "./components/SubmitButton";
 import Reset from "./components/Reset";
 import ComponentStatus from "./components/ComponentStatus";
-import { SubmitIcon } from "./icons";
+import { SubmitIcon, MicIcon } from "./icons";
+import RecordButton from "./components/RecordButton";
 
 const uuidv4 = require("uuid/v4");
 
@@ -31,6 +32,8 @@ class ChatBot extends Component {
       steps: {},
       disabled: true,
       inputValue: "",
+      userSpeak: false,
+      userVoiceMessage: "",
       inputInvalid: false,
       defaultUserSettings: {}
     };
@@ -292,7 +295,36 @@ class ChatBot extends Component {
     }
   };
 
-  submitUserMessage = () => {
+  cleanUserVoiveMessage = () => {
+    this.setState({ userVoiceMessage: "" });
+  };
+
+  killSession = () => {
+    let newRendered = [...this.state.renderedSteps];
+    let newPrevious = [...this.state.previousSteps];
+    newRendered.pop();
+    this.setState({
+      renderedSteps: newRendered,
+      previousSteps: newPrevious
+    });
+  };
+
+  onEndRecord = message => {
+    this.setState({ userSpeak: false });
+    if (message === "") {
+      this.killSession();
+    } else {
+      this.setState({ userVoiceMessage: message });
+    }
+  };
+
+  onStartRecord = () => {
+    this.setState({ userSpeak: true });
+    const voice = true;
+    this.submitUserMessage(voice);
+  };
+
+  submitUserMessage = voice => {
     const {
       defaultUserSettings,
       inputValue,
@@ -303,7 +335,8 @@ class ChatBot extends Component {
 
     const step = {
       message: inputValue,
-      value: inputValue
+      value: inputValue,
+      voice
     };
 
     currentStep = Object.assign({}, defaultUserSettings, currentStep, step);
@@ -315,13 +348,13 @@ class ChatBot extends Component {
       currentStep,
       renderedSteps,
       previousSteps,
-      disabled: true,
+      disabled: voice ? false : true,
       inputValue: ""
     });
   };
 
   renderStep = (step, index, showParams) => {
-    const { renderedSteps } = this.state;
+    const { renderedSteps, userVoiceMessage } = this.state;
     const { options, component, asMessage } = step;
     const steps = this.generateRenderedStepsById();
     const previousStep = index > 0 ? renderedSteps[index - 1] : {};
@@ -356,6 +389,8 @@ class ChatBot extends Component {
         key={index}
         step={step}
         steps={steps}
+        userVoiceMessage={userVoiceMessage}
+        cleanUserVoiveMessage={this.cleanUserVoiveMessage}
         previousStep={previousStep}
         previousValue={previousStep.value}
         triggerNextStep={this.triggerNextStep}
@@ -371,22 +406,30 @@ class ChatBot extends Component {
       disabled,
       inputInvalid,
       inputValue,
-      renderedSteps
+      renderedSteps,
+      userSpeak
     } = this.state;
     const {
       headerTitle,
       componentId,
+      sessionId,
       finishSuccess,
       finishFailed,
       resetSession,
       placeholder,
       width,
       height,
+      voice,
+      setVoice,
       showParams,
-      setShowParams
+      sttUrl,
+      setShowParams,
+      recognitionPlaceholder
     } = this.props;
-    const icon = <SubmitIcon />;
-    const inputPlaceholder = currentStep.placeholder || placeholder;
+    const icon = voice ? <MicIcon userSpeak={userSpeak} /> : <SubmitIcon />;
+    const inputPlaceholder = userSpeak
+      ? recognitionPlaceholder
+      : currentStep.placeholder || placeholder;
 
     return (
       <ChatBotContainer width={width} height={height}>
@@ -394,6 +437,8 @@ class ChatBot extends Component {
           headerTitle={headerTitle}
           showParams={showParams}
           setShowParams={setShowParams}
+          voice={voice}
+          setVoice={setVoice}
         />
         <Content
           showParams={showParams}
@@ -427,16 +472,33 @@ class ChatBot extends Component {
               value={inputValue}
               disabled={disabled}
               componentId={componentId}
+              sessionId={sessionId}
             />
           )}
           {!currentStep.hideInput && !finishSuccess && !finishFailed && (
-            <SubmitButton
-              onClick={this.submitUserMessage}
-              invalid={inputInvalid}
-              disabled={disabled}
-            >
-              {icon}
-            </SubmitButton>
+            <div>
+              {!voice && (
+                <SubmitButton
+                  onClick={this.submitUserMessage}
+                  invalid={inputInvalid}
+                  disabled={disabled}
+                >
+                  {icon}
+                </SubmitButton>
+              )}
+              {voice && (
+                <RecordButton
+                  userSpeak={this.state.userSpeak}
+                  sttUrl={sttUrl}
+                  voice={voice}
+                  onStartRecord={this.onStartRecord}
+                  onEndRecord={this.onEndRecord}
+                  disabled={disabled}
+                >
+                  {icon}
+                </RecordButton>
+              )}
+            </div>
           )}
         </Footer>
       </ChatBotContainer>
@@ -450,12 +512,14 @@ ChatBot.propTypes = {
   customDelay: PropTypes.number,
   headerTitle: PropTypes.string,
   componentId: PropTypes.string,
+  sessionId: PropTypes.string,
   finishSuccess: PropTypes.bool,
   finishFailed: PropTypes.bool,
   showParams: PropTypes.bool,
   setShowParams: PropTypes.any,
   resetSession: PropTypes.any,
   height: PropTypes.string,
+  recognitionPlaceholder: PropTypes.string,
   placeholder: PropTypes.string,
   steps: PropTypes.arrayOf(PropTypes.object).isRequired,
   userAvatar: PropTypes.string,
@@ -468,9 +532,11 @@ ChatBot.defaultProps = {
   customDelay: 1000,
   headerTitle: "Chat",
   componentId: "null",
+  sessionId: "null",
   finishSuccess: false,
   finishFailed: false,
   showParams: true,
+  recognitionPlaceholder: "Listening ...",
   height: "520px",
   placeholder: "Type the message ...",
   userDelay: 1000,

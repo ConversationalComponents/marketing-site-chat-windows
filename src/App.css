@@ -1,3 +1,7 @@
+body {
+  background: none transparent;
+}
+
 .App {
   font-family: "Raleway", sans-serif;
   min-height: 100vh;

@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import withWidth from "@material-ui/core/withWidth";
 import firebase from "../../config/fbConfig";
-import ReactGA from "react-ga";
+// import ReactGA from "react-ga";
 import ReactPixel from "react-facebook-pixel";
 import LinkedInTag from "react-linkedin-insight";
 
@@ -10,7 +10,7 @@ ReactPixel.init("411788576412453");
 LinkedInTag.init(1592785);
 
 const analytics = firebase.analytics();
-ReactGA.initialize("UA-143011310-1");
+// ReactGA.initialize("UA-143011310-1");
 
 const Input = ({
   inputInvalid,
@@ -21,7 +21,8 @@ const Input = ({
   value,
   renderedSteps,
   width,
-  componentId
+  componentId,
+  sessionId
 }) => {
   const inputRef = useRef(null);
   const useStyles = makeStyles(theme => {
@@ -46,12 +47,23 @@ const Input = ({
       }
     };
   });
+  const label = JSON.stringify({
+    component_id: componentId,
+    session_id: sessionId
+  });
+
+  const labelWix = {
+    component_id: componentId,
+    session_id: sessionId
+  };
 
   const [startTime, setStartTime] = useState(null);
   const [startFocus, setStartfocus] = useState(null);
   const [totalTime, setTotaltime] = useState(null);
   const [time, setTime] = useState(null);
   const [first, setFirst] = useState(false);
+  const [second, setSecond] = useState(false);
+  const [third, setThird] = useState(false);
 
   useEffect(() => {
     if (renderedSteps.length > 2) {
@@ -71,50 +83,63 @@ const Input = ({
 
   const onClick = () => {
     if (!startTime) {
-      console.log("new start", componentId);
       setStartTime(performance.now());
     }
-    ReactPixel.trackCustom("Input Click", {
+    const sendObj = {
+      category: "chatwindow",
       action: "Input Click",
-      label: componentId
-    });
-    ReactGA.event({
-      category: "Chat Window",
-      action: "Input Click",
-      label: componentId
-    });
-    analytics.logEvent("input_click", {
-      category: "Chat Window",
-      action: "Input Click",
-      label: componentId
-    });
+      labelWix
+    };
+    window.parent.postMessage(JSON.stringify(sendObj), "*");
+    // window.ga("send", "event", "chatwindow", "Input Click", label);
+    // ReactGA.event({
+    //   category: "chatwindow",
+    //   action: "Input Click",
+    //   label
+    // });
+    // analytics.logEvent("input_click", {
+    //   category: "chatwindow",
+    //   action: "Input Click",
+    //   label
+    // });
     scrollView();
   };
 
   useEffect(() => {
     if (totalTime) {
-      console.log("total", totalTime);
-
       setTime(
         window.setTimeout(() => {
           const value = parseInt(totalTime) + 30;
-          console.log("done!", value);
-          ReactPixel.trackCustom("Conversation Time", {
-            label: componentId,
-            value
-          });
-          ReactGA.event({
-            category: "Chat Window",
+
+          const sendObj = {
+            category: "chatwindow",
             action: "Conversation Time",
-            label: `${componentId}: ${value} sec`,
+            labelWix,
             value
-          });
-          analytics.logEvent("input_click", {
-            category: "Chat Window",
-            action: "Conversation Time",
-            label: `${componentId}: ${value} sec`,
-            value
-          });
+          };
+
+          window.parent.postMessage(JSON.stringify(sendObj), "*");
+
+          // window.ga(
+          //   "send",
+          //   "event",
+          //   "chatwindow",
+          //   "Conversation Time",
+          //   label,
+          //   value
+          // );
+          // ReactGA.event({
+          //   category: "chatwindow",
+          //   action: "Conversation Time",
+          //   label,
+          //   value
+          // });
+          // analytics.logEvent("input_click", {
+          //   category: "chatwindow",
+          //   action: "Conversation Time",
+          //   label,
+          //   value
+          // });
         }, 30000)
       );
     }
@@ -122,38 +147,95 @@ const Input = ({
 
   const keyPress = (e, disabled) => {
     if (e.key === "Enter") {
-      if (!first) {
-        console.log("first");
-        setFirst(true);
-        LinkedInTag.track(1575841);
-        ReactPixel.trackCustom("Start Conversation", {
-          label: componentId
+      if (first && second && !third) {
+        setThird(true);
+        LinkedInTag.track(1575849);
+        ReactPixel.trackCustom("Conversation3Turns", {
+          label
         });
-        ReactGA.event({
-          category: "Chat Window",
-          action: "Start Conversation",
-          label: componentId
-        });
-        analytics.logEvent("input_click", {
-          category: "Chat Window",
-          action: "Start Conversation",
-          label: componentId
-        });
+
+        const sendObj = {
+          category: "chatwindow",
+          action: "Conversation3Turns",
+          labelWix
+        };
+
+        window.parent.postMessage(JSON.stringify(sendObj), "*");
+
+        // window.ga("send", "event", "chatwindow", "Conversation3Turns", label);
+        // ReactGA.event({
+        //   category: "chatwindow",
+        //   action: "Conversation3Turns",
+        //   label
+        // });
+        // analytics.logEvent("Conversation3Turns", {
+        //   category: "chatwindow",
+        //   action: "Conversation3Turns",
+        //   label
+        // });
       }
 
-      ReactPixel.trackCustom("Message Sent", {
-        label: componentId
-      });
-      ReactGA.event({
-        category: "Chat Window",
+      if (first && !second) {
+        setSecond(true);
+      }
+
+      if (!first) {
+        setFirst(true);
+        var callback = function() {
+          if (typeof window.url != "undefined") {
+            window.location = window.url;
+          }
+        };
+        window.gtag("event", "conversion", {
+          send_to: "AW-697286529/jLn-CNG2_rMBEIH_vswC",
+          event_callback: callback
+        });
+
+        LinkedInTag.track(1575841);
+        ReactPixel.trackCustom("StartConversation", {
+          label
+        });
+
+        const sendObj = {
+          category: "chatwindow",
+          action: "StartConversation",
+          labelWix
+        };
+
+        window.parent.postMessage(JSON.stringify(sendObj), "*");
+
+        // window.ga("send", "event", "chatwindow", "StartConversation", label);
+        // ReactGA.event({
+        //   category: "chatwindow",
+        //   action: "StartConversation",
+        //   label
+        // });
+        // analytics.logEvent("input_click", {
+        //   category: "chatwindow",
+        //   action: "StartConversation",
+        //   label
+        // });
+      }
+
+      const sendObj = {
+        category: "chatwindow",
         action: "Message Sent",
-        label: componentId
-      });
-      analytics.logEvent("input_click", {
-        category: "Chat Window",
-        action: "Message Sent",
-        label: componentId
-      });
+        labelWix
+      };
+
+      window.parent.postMessage(JSON.stringify(sendObj), "*");
+
+      // window.ga("send", "event", "chatwindow", "Message Sent", label);
+      // ReactGA.event({
+      //   category: "chatwindow",
+      //   action: "Message Sent",
+      //   label
+      // });
+      // analytics.logEvent("input_click", {
+      //   category: "chatwindow",
+      //   action: "Message Sent",
+      //   label
+      // });
       if (startTime) {
         clearTimeout(time);
         const total = ((performance.now() - startTime) / 1000).toFixed(2);
@@ -164,34 +246,31 @@ const Input = ({
   };
 
   const onFocus = () => {
-    console.log("focus", componentId);
     setStartfocus(performance.now());
     scrollView();
   };
 
   const onBlur = () => {
-    console.log("blur", componentId);
     const totalFocusTime = ((performance.now() - startFocus) / 1000).toFixed(2);
-    console.log("total focus", totalFocusTime);
-    if (totalFocusTime > 10) {
-      LinkedInTag.track(1575849);
-      ReactPixel.trackCustom("Conversation10Sec", {
-        label: componentId,
-        value: totalFocusTime
-      });
-      ReactGA.event({
-        category: "Chat Window",
-        action: "Conversation10Sec",
-        label: `${componentId}: ${totalFocusTime} sec`,
-        value: totalFocusTime
-      });
-      analytics.logEvent("Conversation10Sec", {
-        category: "Chat Window",
-        action: "Conversation10Sec",
-        label: `${componentId}: ${totalFocusTime} sec`,
-        value: totalFocusTime
-      });
-    }
+    // if (totalFocusTime > 10) {
+    //   LinkedInTag.track(1575849);
+    //   ReactPixel.trackCustom("Conversation10Sec", {
+    //     label,
+    //     value: totalFocusTime
+    //   });
+    //   ReactGA.event({
+    //     category: "chatwindow",
+    //     action: "Conversation10Sec",
+    //     label,
+    //     value: totalFocusTime
+    //   });
+    //   analytics.logEvent("Conversation10Sec", {
+    //     category: "chatwindow",
+    //     action: "Conversation10Sec",
+    //     label,
+    //     value: totalFocusTime
+    //   });
+    // }
   };
 
   const classes = useStyles();

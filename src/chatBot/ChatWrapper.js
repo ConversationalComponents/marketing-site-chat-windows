@@ -3,15 +3,26 @@ import ChatBot from "./ChatBot";
 import BotTextResponse from "./custom_components/BotTextResponse";
 import Params from "./custom_components/Params";
 import JsonView from "./custom_components/JsonView";
+import { narrate } from "coco-with-voice";
+
 const uuidv4 = require("uuid/v4");
+const ttsUrl = "https://voice-server-dot-coco-235210.appspot.com/tts";
+const sttUrl = "https://voice-server-dot-coco-235210.appspot.com/stt";
 
 const ChatWrapper = ({ height, width, name, componentId }) => {
   const [success, setSuccess] = useState(false);
+  const [voice, setVoice] = useState(false);
   const [showParams, setShowParams] = useState(true);
   const [requirementKey, setRequirementKey] = useState(new Date());
   const [failed, setFailed] = useState(false);
   const [steps, setSteps] = useState([]);
+  const [lastText, setLastText] = useState("");
+
   let sessionId = uuidv4();
+
+  useEffect(() => {
+    voice && narrate(lastText, true, ttsUrl);
+  }, [lastText]);
 
   const reset = () => {
     sessionId = uuidv4();
@@ -37,6 +48,7 @@ const ChatWrapper = ({ height, width, name, componentId }) => {
           id: "custom",
           component: (
             <BotTextResponse
+              onResponse={setLastText}
               setSuccess={setSuccess}
               setFailed={setFailed}
               sessionId={sessionId}
@@ -67,7 +79,7 @@ const ChatWrapper = ({ height, width, name, componentId }) => {
 
   return (
     <div key={requirementKey}>
-      {steps.length > 0 && (
+      {steps.length > 0 && sessionId && (
         <ChatBot
           steps={steps}
           headerTitle={name}
@@ -79,6 +91,10 @@ const ChatWrapper = ({ height, width, name, componentId }) => {
           showParams={showParams}
           setShowParams={setShowParams}
           componentId={componentId}
+          sessionId={sessionId}
+          voice={voice}
+          setVoice={setVoice}
+          sttUrl={sttUrl}
         />
       )}
     </div>

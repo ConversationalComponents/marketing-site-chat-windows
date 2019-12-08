@@ -1,15 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ChatBot from "../../chatBot/ChatBot";
 import BotDemoResponse from "./botDemoResponse";
+import { narrate } from "coco-with-voice";
 
 const uuidv4 = require("uuid/v4");
+const ttsUrl = "https://voice-server-dot-coco-235210.appspot.com/tts";
+const sttUrl = "https://voice-server-dot-coco-235210.appspot.com/stt";
+
 let sessionId = uuidv4();
 
 const DemoMobile = () => {
   const [showParams, setShowParams] = useState(true);
   const [success, setSuccess] = useState(false);
+  const [voice, setVoice] = useState(true);
   const [failed, setFailed] = useState(false);
   const [requirementKey, setRequirementKey] = useState(new Date());
+  const [lastText, setLastText] = useState("");
 
   const steps = [
     {
@@ -26,6 +32,7 @@ const DemoMobile = () => {
       id: "custom",
       component: (
         <BotDemoResponse
+          onResponse={setLastText}
           setSuccess={setSuccess}
           setFailed={setFailed}
           sessionId={sessionId}
@@ -35,6 +42,10 @@ const DemoMobile = () => {
       asMessage: true
     }
   ];
+
+  useEffect(() => {
+    voice && narrate(lastText, true, ttsUrl);
+  }, [lastText]);
 
   const reset = () => {
     setSuccess(false);
@@ -56,6 +67,9 @@ const DemoMobile = () => {
         height="490px"
         width="320px"
         componentId="CoCo Bot"
+        voice={voice}
+        setVoice={setVoice}
+        sttUrl={sttUrl}
       />
     </div>
   );

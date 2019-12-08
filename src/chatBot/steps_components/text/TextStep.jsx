@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import Bubble from "./Bubble";
 import Image from "./Image";
@@ -6,33 +6,59 @@ import ImageContainer from "./ImageContainer";
 import Loading from "../common/Loading";
 import TextStepContainer from "./TextStepContainer";
 
-class TextStep extends Component {
-  /* istanbul ignore next */
-  state = {
-    loading: true
-  };
+const TextStep = props => {
+  const [loading, setloading] = useState(true);
+  const [userVoice, setUserVoice] = useState("");
+  const [updated, setUpdated] = useState(false);
+  const {
+    step,
+    triggerNextStep,
+    isFirst,
+    isLast,
+    userVoiceMessage,
+    cleanUserVoiveMessage
+  } = props;
+  const { component, delay, waitAction, avatar, user, voice } = step;
+  const isComponentWatingUser = component && waitAction;
 
-  componentDidMount() {
-    const { step, triggerNextStep } = this.props;
-    const { component, delay, waitAction } = step;
-    const isComponentWatingUser = component && waitAction;
-
-    setTimeout(() => {
-      this.setState({ loading: false }, () => {
+  useEffect(() => {
+    if (!voice) {
+      setTimeout(() => {
+        setloading(false);
         if (!isComponentWatingUser && !step.rendered) {
           triggerNextStep();
         }
-      });
-    }, delay);
-  }
+      }, delay);
+    }
+  }, []);
 
-  getMessage = () => {
-    const { message } = this.props.step;
-    return message;
+  useEffect(() => {
+    if (voice && userVoiceMessage) {
+      if (!updated) {
+        setUpdated(true);
+        setUserVoice(userVoiceMessage);
+        setloading(false);
+        if (!isComponentWatingUser && !step.rendered) {
+          triggerNextStep({
+            value: { voiceMessage: userVoiceMessage }
+          });
+          cleanUserVoiveMessage();
+        }
+      }
+    }
+  }, [userVoiceMessage]);
+
+  const getMessage = () => {
+    const { message } = props.step;
+    if (voice) {
+      return userVoice;
+    } else {
+      return message;
+    }
   };
 
-  renderMessage = () => {
-    const { step, steps, previousStep, triggerNextStep } = this.props;
+  const renderMessage = () => {
+    const { step, steps, previousStep, triggerNextStep } = props;
     const { component } = step;
 
     if (component) {
@@ -44,26 +70,20 @@ class TextStep extends Component {
       });
     }
 
-    return this.getMessage();
+    return getMessage();
   };
 
-  render() {
-    const { step, isFirst, isLast } = this.props;
-    const { loading } = this.state;
-    const { avatar, user } = step;
-
-    return (
-      <TextStepContainer user={user} step={step}>
-        <ImageContainer user={user}>
-          {isFirst && <Image user={user} src={avatar} />}
-        </ImageContainer>
-        <Bubble user={user} isFirst={isFirst} isLast={isLast}>
-          {loading ? <Loading /> : this.renderMessage()}
-        </Bubble>
-      </TextStepContainer>
-    );
-  }
-}
+  return (
+    <TextStepContainer user={user} step={step}>
+      <ImageContainer user={user}>
+        {isFirst && <Image user={user} src={avatar} />}
+      </ImageContainer>
+      <Bubble user={user} isFirst={isFirst} isLast={isLast}>
+        {loading ? <Loading /> : renderMessage()}
+      </Bubble>
+    </TextStepContainer>
+  );
+};
 
 TextStep.propTypes = {
   isFirst: PropTypes.bool.isRequired,

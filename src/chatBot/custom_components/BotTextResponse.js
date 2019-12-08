@@ -8,7 +8,8 @@ const BotTextResponse = ({
   triggerNextStep,
   setSuccess,
   setFailed,
-  componentId
+  componentId,
+  onResponse
 }) => {
   const [res, setRes] = useState(null);
   const inputEl = useRef(null);
@@ -24,7 +25,8 @@ const BotTextResponse = ({
 
   useEffect(() => {
     if (previousStep) {
-      const text = previousStep.message;
+      const voiceMessage = previousStep.value.voiceMessage;
+      const text = voiceMessage ? voiceMessage : previousStep.message;
       axios
         .post(
           `https://app.coco.imperson.com/api/exchange/${componentId}/${sessionId}`,
@@ -46,10 +48,11 @@ const BotTextResponse = ({
             setRes({ ...response.data, response: "" });
           } else {
             setRes({ ...response.data });
+            onResponse(response.data.response);
           }
         })
         .catch(function(error) {
-          setRes({ response: "Failure!" });
+          setRes({ response: "" });
           setFailed(true);
           console.log("error", error);
         });

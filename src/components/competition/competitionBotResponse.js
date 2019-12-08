@@ -8,7 +8,8 @@ const CompetitionBotResponse = ({
   sessionId,
   triggerNextStep,
   setFailed,
-  componentId
+  componentId,
+  onResponse
 }) => {
   const [res, setRes] = useState(null);
   const inputEl = useRef(null);
@@ -53,7 +54,9 @@ const CompetitionBotResponse = ({
 
   useEffect(() => {
     if (previousStep) {
-      const text = previousStep.message;
+      const voiceMessage = previousStep.value.voiceMessage;
+      const text = voiceMessage ? voiceMessage : previousStep.message;
+      console.log("text", text);
       axios
         .post(
           `https://app.coco.imperson.com/api/exchange/${componentId}/${sessionId}`,
@@ -77,9 +80,10 @@ const CompetitionBotResponse = ({
               )
               .then(function(response) {
                 setRes({ ...response.data });
+                onResponse(response.data.response);
               })
               .catch(function(error) {
-                setRes({ response: "Failure!" });
+                setRes({ response: "" });
                 setFailed(true);
                 console.log("error", error);
               });
@@ -88,11 +92,12 @@ const CompetitionBotResponse = ({
               setRes({ ...response.data, response: "" });
             } else {
               setRes({ ...response.data });
+              onResponse(response.data.response);
             }
           }
         })
         .catch(function(error) {
-          setRes({ response: "Failure!" });
+          setRes({ response: "" });
           setFailed(true);
           console.log("error", error);
         });
