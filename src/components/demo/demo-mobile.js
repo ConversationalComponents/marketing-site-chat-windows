@@ -64,7 +64,7 @@ const DemoMobile = () => {
         resetSession={reset}
         showParams={showParams}
         setShowParams={setShowParams}
-        height="490px"
+        height="470px"
         width="320px"
         componentId="CoCo Bot"
         voice={voice}

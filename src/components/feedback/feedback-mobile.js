@@ -9,7 +9,7 @@ const FeedbackMobile = () => {
     >
       <ChatWrapper
         name="CoCo Feedback"
-        height="490px"
+        height="470px"
         width="320px"
         componentId="complainer_vp3"
       />

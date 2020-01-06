@@ -66,8 +66,8 @@ const Competition = () => {
           resetSession={reset}
           showParams={showParams}
           setShowParams={setShowParams}
-          height="490px"
-          width="350px"
+          height="470px"
+          width="320px"
           componentId={componentId}
           voice={voice}
           setVoice={setVoice}

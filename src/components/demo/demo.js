@@ -68,8 +68,8 @@ const Demo = () => {
         resetSession={reset}
         showParams={showParams}
         setShowParams={setShowParams}
-        height="490px"
-        width="350px"
+        height="470px"
+        width="320px"
         componentId="CoCo Bot"
         voice={voice}
         setVoice={setVoice}

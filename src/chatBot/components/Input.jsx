@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import withWidth from "@material-ui/core/withWidth";
-import firebase from "../../config/fbConfig";
+// import firebase from "../../config/fbConfig";
 // import ReactGA from "react-ga";
 import ReactPixel from "react-facebook-pixel";
 import LinkedInTag from "react-linkedin-insight";
@@ -9,7 +9,6 @@ import LinkedInTag from "react-linkedin-insight";
 ReactPixel.init("411788576412453");
 LinkedInTag.init(1592785);
 
-const analytics = firebase.analytics();
 // ReactGA.initialize("UA-143011310-1");
 
 const Input = ({

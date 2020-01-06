@@ -66,7 +66,7 @@ const CompetitionMobile = () => {
           resetSession={reset}
           showParams={showParams}
           setShowParams={setShowParams}
-          height="490px"
+          height="470px"
           width="320px"
           componentId={componentId}
           voice={voice}

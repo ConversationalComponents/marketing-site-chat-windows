@@ -9,7 +9,7 @@ const SchedulerMobile = () => {
     >
       <ChatWrapper
         name="CoCo Scheduler"
-        height="490px"
+        height="470px"
         width="320px"
         componentId="scheduler_vp3"
       />

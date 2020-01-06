@@ -9,7 +9,7 @@ const AddressMobile = () => {
     >
       <ChatWrapper
         name="CoCo Address"
-        height="490px"
+        height="470px"
         width="320px"
         componentId="get_address_vp3"
       />
