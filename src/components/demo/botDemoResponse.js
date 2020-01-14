@@ -22,8 +22,10 @@ const BotDemoResponse = ({
   useEffect(() => {
     if (previousStep) {
       const voiceMessage = previousStep.value.voiceMessage;
-      const text = voiceMessage ? voiceMessage : previousStep.message;
+      var text = voiceMessage ? voiceMessage : previousStep.message;
       // const text = previousStep.message;
+      
+      text = text.replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"')
 
       axios
         .post(
