@@ -43,13 +43,8 @@ const BotTextResponse = ({
               setSuccess(true);
             }
           }
-
-          if (!response.data.response) {
-            setRes({ ...response.data, response: "" });
-          } else {
-            setRes({ ...response.data });
-            onResponse(response.data.response);
-          }
+          setRes({ ...response.data, response: response.data.response || " " });
+          onResponse(response.data.response);
         })
         .catch(function(error) {
           setRes({ response: "" });
